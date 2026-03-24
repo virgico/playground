@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>vibecoding lab</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap');
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Space Grotesk',sans-serif;background:#F5F0EB;color:#1A1A2E;overflow:hidden;height:100vh;width:100vw;cursor:default;}
+
+  /* Soft animated background */
+  .nebula{position:fixed;inset:0;z-index:0;overflow:hidden;}
+  .nebula-blob{position:absolute;border-radius:50%;filter:blur(140px);opacity:0.35;animation:drift 20s ease-in-out infinite alternate;}
+  .nb1{width:600px;height:600px;background:radial-gradient(circle,#C8B8E8,transparent 70%);top:-10%;left:-5%;animation-duration:25s;}
+  .nb2{width:500px;height:500px;background:radial-gradient(circle,#A8A0D2,transparent 70%);bottom:-15%;right:-5%;animation-duration:18s;animation-delay:-5s;}
+  .nb3{width:400px;height:400px;background:radial-gradient(circle,#E8D8C8,transparent 70%);top:40%;left:50%;animation-duration:22s;animation-delay:-10s;}
+  .nb4{width:300px;height:300px;background:radial-gradient(circle,#D4E8D0,transparent 70%);top:10%;right:30%;animation-duration:28s;animation-delay:-3s;}
+  @keyframes drift{0%{transform:translate(0,0) scale(1)}50%{transform:translate(40px,-30px) scale(1.1)}100%{transform:translate(-20px,40px) scale(0.95)}}
+
+  /* Dot grid */
+  .dot-grid{position:fixed;inset:0;z-index:1;opacity:0.06;
+    background-image:radial-gradient(circle,#7B6BA8 0.8px,transparent 0.8px);background-size:28px 28px;}
+
+  /* Stars - subtle light sparkles */
+  .stars{position:fixed;inset:0;z-index:1;pointer-events:none;}
+  .star{position:absolute;background:#7B6BA8;border-radius:50%;}
+
+  /* Header */
+  .header{position:fixed;top:0;left:0;right:0;z-index:20;padding:40px 48px;pointer-events:none;}
+  .header h1{font-family:'Syne',sans-serif;font-size:2.6rem;font-weight:800;letter-spacing:-1.5px;line-height:1.15;color:#1A1A2E;}
+  .header h1 span{background:linear-gradient(135deg,#7B6BA8 0%,#A8A0D2 50%,#C8B8E8 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .header p{font-size:0.75rem;color:rgba(123,107,168,0.5);letter-spacing:3px;text-transform:uppercase;margin-top:10px;font-weight:400;}
+
+  /* Galaxy */
+  .galaxy{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;}
+
+  /* Orbit rings */
+  .connector{position:absolute;border-radius:50%;border:1px solid rgba(123,107,168,0.06);pointer-events:none;z-index:5;
+    top:50%;left:50%;transform:translate(-50%,-50%);}
+
+  /* Cards */
+  .orbit-card{position:absolute;width:210px;height:210px;cursor:pointer;}
+  .orbit-card-inner{width:100%;height:100%;border-radius:24px;padding:26px;display:flex;flex-direction:column;justify-content:flex-end;
+    background:rgba(255,255,255,0.5);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+    border:1px solid rgba(255,255,255,0.7);position:relative;overflow:hidden;
+    box-shadow:0 8px 32px rgba(123,107,168,0.08);
+    transition:all 0.5s cubic-bezier(0.23,1,0.32,1);}
+  .orbit-card:hover .orbit-card-inner{background:rgba(255,255,255,0.75);border-color:rgba(200,184,232,0.6);
+    box-shadow:0 16px 60px rgba(123,107,168,0.18),0 0 80px rgba(168,160,210,0.08);}
+
+  /* Animated border */
+  .orbit-card-inner::before{content:'';position:absolute;inset:-1px;border-radius:24px;padding:1.5px;
+    background:conic-gradient(from var(--angle,0deg),transparent 0%,rgba(123,107,168,0.35) 25%,transparent 50%,rgba(200,184,232,0.3) 75%,transparent 100%);
+    -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;
+    opacity:0;transition:opacity 0.5s ease;animation:rotateBorder 4s linear infinite;}
+  .orbit-card:hover .orbit-card-inner::before{opacity:1;}
+  @keyframes rotateBorder{to{--angle:360deg;}}
+  @property --angle{syntax:'<angle>';initial-value:0deg;inherits:false;}
+
+  .card-num{font-family:'Syne',sans-serif;font-size:4.2rem;font-weight:800;position:absolute;top:14px;right:20px;
+    line-height:1;opacity:0.05;color:#7B6BA8;transition:opacity 0.5s ease;}
+  .orbit-card:hover .card-num{opacity:0.15;}
+  .card-label{font-size:0.58rem;text-transform:uppercase;letter-spacing:2px;color:rgba(123,107,168,0.55);margin-bottom:5px;font-weight:400;}
+  .card-name{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;letter-spacing:-0.5px;line-height:1.2;color:#1A1A2E;}
+
+  /* Modal */
+  .overlay{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;
+    background:rgba(245,240,235,0.6);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+    opacity:0;pointer-events:none;transition:opacity 0.4s ease;}
+  .overlay.active{opacity:1;pointer-events:all;}
+
+  .modal{background:rgba(255,255,255,0.7);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);
+    border:1px solid rgba(255,255,255,0.8);border-radius:28px;padding:40px;max-width:620px;width:92%;
+    transform:scale(0.9) translateY(20px);transition:transform 0.45s cubic-bezier(0.23,1,0.32,1);
+    box-shadow:0 40px 100px rgba(123,107,168,0.12),0 0 60px rgba(123,107,168,0.06);}
+  .overlay.active .modal{transform:scale(1) translateY(0);}
+  .modal-close{position:absolute;top:18px;right:22px;background:rgba(123,107,168,0.06);border:1px solid rgba(123,107,168,0.12);
+    font-size:1.1rem;cursor:pointer;color:rgba(26,26,46,0.4);width:36px;height:36px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;transition:all 0.3s ease;font-family:'Space Grotesk',sans-serif;}
+  .modal-close:hover{background:rgba(123,107,168,0.12);color:#1A1A2E;}
+
+  .modal-video{width:100%;aspect-ratio:16/9;border-radius:16px;overflow:hidden;margin-bottom:28px;position:relative;cursor:pointer;
+    background:#eee;border:1px solid rgba(123,107,168,0.1);}
+  .modal-video canvas{width:100%;height:100%;}
+  .play-btn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+    width:56px;height:56px;background:rgba(255,255,255,0.7);backdrop-filter:blur(12px);
+    border:1px solid rgba(255,255,255,0.8);border-radius:50%;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 8px 32px rgba(123,107,168,0.15);transition:all 0.3s ease;}
+  .modal-video:hover .play-btn{background:rgba(255,255,255,0.9);transform:translate(-50%,-50%) scale(1.08);}
+  .play-icon{width:0;height:0;border-style:solid;border-width:8px 0 8px 14px;border-color:transparent transparent transparent #7B6BA8;margin-left:2px;}
+
+  .modal-label{font-size:0.58rem;text-transform:uppercase;letter-spacing:3px;color:rgba(123,107,168,0.5);margin-bottom:8px;}
+  .modal-title{font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:700;letter-spacing:-1px;margin-bottom:14px;color:#1A1A2E;}
+  .modal-desc{font-size:0.9rem;line-height:1.8;color:rgba(26,26,46,0.55);font-weight:400;}
+
+  /* Branding */
+  .branding{position:fixed;bottom:24px;left:28px;z-index:50;opacity:0.25;transition:opacity 0.3s ease;}
+  .branding:hover{opacity:0.5;}
+  .branding svg{height:22px;}
+
+  .hint{position:fixed;bottom:28px;right:28px;z-index:50;font-size:0.6rem;color:rgba(123,107,168,0.3);letter-spacing:1.5px;text-transform:uppercase;}
+</style>
+</head>
+<body>
+
+<div class="nebula">
+  <div class="nebula-blob nb1"></div>
+  <div class="nebula-blob nb2"></div>
+  <div class="nebula-blob nb3"></div>
+  <div class="nebula-blob nb4"></div>
+</div>
+<div class="dot-grid"></div>
+<div class="stars" id="stars"></div>
+
+<div class="header">
+  <h1>things i've decided to<br><span>"play"</span> myself with...</h1>
+</div>
+
+<div class="galaxy" id="galaxy">
+  <div class="connector" style="width:420px;height:420px;"></div>
+  <div class="connector" style="width:650px;height:650px;"></div>
+  <div class="connector" style="width:880px;height:880px;"></div>
+
+  <div class="orbit-card" id="card0" onclick="openModal(0)">
+    <div class="orbit-card-inner">
+      <div class="card-num">01</div>
+      <div class="card-label">ice-breaker game</div>
+      <div class="card-name">Bingo<br>Breaker</div>
+    </div>
+  </div>
+  <div class="orbit-card" id="card1" onclick="openModal(1)">
+    <div class="orbit-card-inner">
+      <div class="card-num">02</div>
+      <div class="card-label">self-assessment</div>
+      <div class="card-name">AI Competency<br>Radar</div>
+    </div>
+  </div>
+  <div class="orbit-card" id="card2" onclick="openModal(2)">
+    <div class="orbit-card-inner">
+      <div class="card-num">03</div>
+      <div class="card-label">retro tool</div>
+      <div class="card-name">Retro<br>Flex</div>
+    </div>
+  </div>
+  <div class="orbit-card" id="card3" onclick="openModal(3)">
+    <div class="orbit-card-inner">
+      <div class="card-num">04</div>
+      <div class="card-label">personal L&D</div>
+      <div class="card-name">dev<br>OS</div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="overlay" id="overlay" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal()">&#x2715;</button>
+    <div class="modal-video">
+      <canvas id="videoCanvas"></canvas>
+      <div class="play-btn"><div class="play-icon"></div></div>
+    </div>
+    <div class="modal-label" id="modalLabel"></div>
+    <div class="modal-title" id="modalTitle"></div>
+    <div class="modal-desc" id="modalDesc"></div>
+  </div>
+</div>
+
+<!-- Branding -->
+<div class="branding">
+  <svg viewBox="0 0 220 40" xmlns="http://www.w3.org/2000/svg">
+    <rect x="2" y="4" width="32" height="32" rx="10" fill="none" stroke="#1A1A2E" stroke-width="2"/>
+    <circle cx="18" cy="20" r="8" fill="#1A1A2E"/>
+    <rect x="40" y="4" width="32" height="32" rx="10" fill="#1A1A2E"/>
+    <circle cx="56" cy="20" r="7.5" fill="#F5F0EB"/>
+    <text x="82" y="26" font-family="Syne,sans-serif" font-size="18" font-weight="700" fill="#1A1A2E">Riverflex</text>
+  </svg>
+</div>
+
+<div class="hint">hover to pause &middot; click to explore</div>
+
+<script>
+const projects = [
+  { title:"Bingo Breaker", label:"ice-breaker game",
+    desc:"A digital ice-breaker bingo card designed for QBRs and team gatherings. Players mingle, match prompts to colleagues, and compete to hit bingo first \u2014 turning awkward intros into a game everyone actually wants to play.",
+    colors:["#C8B8E8","#A8A0D2","#F0C8D8"]},
+  { title:"AI Competency Radar", label:"self-assessment",
+    desc:"A self-assessment tool built on Riverflex\u2019s own AI competency framework. Map your current skill levels across key AI dimensions, visualize gaps on an interactive radar chart, and get personalized, actionable next steps to level up.",
+    colors:["#7B6BA8","#C8B8E8","#A8A0D2"]},
+  { title:"RetroFlex", label:"retro tool \u00b7 daki framework",
+    desc:"An interactive project retrospective tool powered by the DAKI framework (Drop, Add, Keep, Improve). Teams collaboratively submit cards, vote on priorities, and walk away with a clear action plan \u2014 no more messy post-its or forgotten follow-ups.",
+    colors:["#A8A0D2","#D4E8D0","#C8B8E8"]},
+  { title:"devOS", label:"personal learning os",
+    desc:"A personal learning & development operating system for continuous skill-building. Features modular tracks across coding languages, bite-sized challenges, a freeform playground for experimentation, and a progress dashboard that shows exactly where you\u2019ve been and where to go next.",
+    colors:["#E8D8C8","#A8A0D2","#F0C8D8"]}
+];
+
+// Stars (subtle sparkles)
+const starsEl=document.getElementById('stars');
+for(let i=0;i<100;i++){
+  const s=document.createElement('div');s.className='star';
+  const sz=Math.random()*1.5+0.5;
+  s.style.cssText='width:'+sz+'px;height:'+sz+'px;left:'+Math.random()*100+'%;top:'+Math.random()*100+'%;opacity:'+(Math.random()*0.2+0.05)+';animation:twinkle '+(Math.random()*4+3)+'s ease-in-out infinite alternate;animation-delay:'+(Math.random()*4)+'s;';
+  starsEl.appendChild(s);
+}
+var twinkleStyle=document.createElement('style');
+twinkleStyle.textContent='@keyframes twinkle{0%{opacity:0.03;transform:scale(0.8)}100%{opacity:0.25;transform:scale(1.3)}}';
+document.head.appendChild(twinkleStyle);
+
+// Orbital motion
+var cards=[document.getElementById('card0'),document.getElementById('card1'),document.getElementById('card2'),document.getElementById('card3')];
+var orbits=[
+  {r:200, speed:0.00025, angle:0, tilt:0.35, offsetX:60, offsetY:-30},
+  {r:310, speed:-0.00018, angle:Math.PI*0.55, tilt:0.28, offsetX:-40, offsetY:20},
+  {r:260, speed:0.0003, angle:Math.PI*1.1, tilt:0.4, offsetX:30, offsetY:40},
+  {r:370, speed:-0.00015, angle:Math.PI*1.65, tilt:0.22, offsetX:-60, offsetY:-20}
+];
+
+var hoveredCard=-1, isModalOpen=false;
+
+cards.forEach(function(c,i){
+  c.addEventListener('mouseenter',function(){hoveredCard=i;});
+  c.addEventListener('mouseleave',function(){hoveredCard=-1;});
+});
+
+function animate(){
+  if(!isModalOpen){
+    var cx=window.innerWidth/2;
+    var cy=window.innerHeight/2;
+    for(var i=0;i<4;i++){
+      var o=orbits[i];
+      var slow=hoveredCard===i?0.015:(hoveredCard>=0?0.25:1);
+      o.angle+=o.speed*16*slow;
+      var x=Math.cos(o.angle)*o.r+o.offsetX;
+      var y=Math.sin(o.angle)*o.r*o.tilt+o.offsetY;
+      var z=Math.sin(o.angle);
+      var scale=0.88+z*0.12;
+      var opacity=0.65+z*0.35;
+      cards[i].style.transform='translate('+(cx+x-105)+'px,'+(cy+y-105)+'px) scale('+(hoveredCard===i?1.06:scale)+')';
+      cards[i].style.zIndex=Math.round(z*10)+10;
+      cards[i].style.opacity=hoveredCard===i?1:opacity;
+    }
+  }
+  requestAnimationFrame(animate);
+}
+requestAnimationFrame(animate);
+
+// Video placeholder
+function drawVideo(colors){
+  var c=document.getElementById('videoCanvas');
+  var ctx=c.getContext('2d');c.width=640;c.height=360;
+  var g=ctx.createLinearGradient(0,0,c.width,c.height);
+  g.addColorStop(0,colors[0]);g.addColorStop(0.5,colors[1]);g.addColorStop(1,colors[2]);
+  ctx.fillStyle=g;ctx.fillRect(0,0,c.width,c.height);
+  ctx.globalAlpha=0.1;ctx.strokeStyle='#fff';
+  for(var x=0;x<c.width;x+=30){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,c.height);ctx.stroke();}
+  for(var y=0;y<c.height;y+=30){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(c.width,y);ctx.stroke();}
+  ctx.globalAlpha=1;
+  ctx.strokeStyle='rgba(255,255,255,0.25)';ctx.lineWidth=1.5;
+  [[16,16,1,1],[c.width-16,16,-1,1],[16,c.height-16,1,-1],[c.width-16,c.height-16,-1,-1]].forEach(function(p){
+    ctx.beginPath();ctx.moveTo(p[0],p[1]+20*p[3]);ctx.lineTo(p[0],p[1]);ctx.lineTo(p[0]+20*p[2],p[1]);ctx.stroke();});
+  ctx.fillStyle='rgba(255,100,100,0.5)';ctx.beginPath();ctx.arc(c.width-36,24,4,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,0.4)';ctx.font='500 10px Space Grotesk,sans-serif';ctx.fillText('DEMO',c.width-72,28);
+}
+
+function openModal(i){
+  isModalOpen=true;
+  var p=projects[i];
+  document.getElementById('modalLabel').textContent=p.label;
+  document.getElementById('modalTitle').textContent=p.title;
+  document.getElementById('modalDesc').textContent=p.desc;
+  drawVideo(p.colors);
+  document.getElementById('overlay').classList.add('active');
+}
+function closeModal(e){
+  if(e&&e.target&&e.target!==document.getElementById('overlay'))return;
+  document.getElementById('overlay').classList.remove('active');
+  setTimeout(function(){isModalOpen=false;},400);
+}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal();});
+</script>
+</body>
+</html>
